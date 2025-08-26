@@ -85,3 +85,17 @@ Resource Group – Organized project assets.
             │ Dashboards & Analytics   │
             └──────────────────────────┘
 
+## Attack Maps & Findings
+- **World Map of Attacks** - Displays source IP geolocations
+- **Heatmaps** - Show attack frequency and intensity
+- **Failed Logins (Event ID 4625)** - Highlight brute-force attempts
+
+### Observation: 
+- One attacker attempted **3.11k** times log into the exposed VM
+- IP geolocation confirmed global scanning activity.
+
+## Conclusion
+To conclude this project, I built a vulnerable cloud-based honeypot using Microsft Azure. Microsoft Sentinel was then to capture and analyze attacker behaviour and display it on a custom Sentinel SIEM Dashboard to track real world attacks. If the virtual honey pot were left to be running for days it would detect attackers from all over the globe.
+
+Someways that I can go about improving this system would be incorporate a honeynet, so that more attackers and drawn in. Also automated incident response along with real-time alterting for SOC workflows would better imitate a real life scenario. 
+
