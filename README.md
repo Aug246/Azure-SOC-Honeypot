@@ -60,6 +60,7 @@ Resource Group – Organized project assets.
 - Developed Sentinel workbooks to display attack heat maps and logon attempt dashboards.
 
 ## SOC Architechture
+![Cloud Honeynet / SOC](https://imgur.com/a/soc-hJnR58l)
 
             ┌──────────────────────────┐
             │        Internet           │
@@ -86,6 +87,9 @@ Resource Group – Organized project assets.
             └──────────────────────────┘
 
 ## Attack Maps & Findings
+
+![Attack Map](https://imgur.com/a/attack-map-5f70cU1)
+
 - **World Map of Attacks** - Displays source IP geolocations
 - **Heatmaps** - Show attack frequency and intensity
 - **Failed Logins (Event ID 4625)** - Highlight brute-force attempts
