@@ -60,35 +60,63 @@ Resource Group – Organized project assets.
 - Developed Sentinel workbooks to display attack heat maps and logon attempt dashboards.
 
 ## SOC Architechture
-![Cloud Honeynet / SOC](https://imgur.com/a/soc-hJnR58l)
+![Cloud Honeynet / SOC](https://i.imgur.com/RdPR7op.png)
 
-            ┌──────────────────────────┐
-            │        Internet           │
-            └─────────────┬────────────┘
-                          │
-                  Inbound Attacks
-                          │
-            ┌─────────────▼────────────┐
-            │      Honeypot VM         │
-            │  (Windows, no firewall)  │
-            └─────────────┬────────────┘
-                          │
-                   Security Logs
-                          │
-            ┌─────────────▼────────────┐
-            │ Log Analytics Workspace  │
-            └─────────────┬────────────┘
-                          │
-                  Data Ingestion
-                          │
-            ┌─────────────▼────────────┐
-            │    Microsoft Sentinel    │
-            │ Dashboards & Analytics   │
-            └──────────────────────────┘
-
+- This machine is discoverable on the internet and malicious actors can attempt to log into the computer
+- There is essentially no Network Security Group because I created an inbound security rule that allows all traffic into the VM
+- All of the traffic including failed log in attempts are forwared to Log Analytics Workspace (LAW) as logs with EventID 4625
+- Sentinel uses the LAW and a custom watchlist which can be found [here](https://drive.google.com/file/d/13EfjM_4BohrmaxqXZLB5VUBIz2sv9Siz/view) to filter through the logs with a custom query to find attackers and their locations.
+```KQL
+    let GeoIPDB_FULL = _GetWatchlist("geoip");
+    let WindowsEvents = SecurityEvent;
+    WindowsEvents | where EventID == 4625
+    | order by TimeGenerated desc
+    | evaluate ipv4_lookup(GeoIPDB_FULL, IpAddress, network)
+    | summarize FailureCount = count() by IpAddress, latitude, longitude, cityname, countryname
+    | project FailureCount, AttackerIp = IpAddress, latitude, longitude, city = cityname, country = countryname,
+    friendly_location = strcat(cityname, " (", countryname, ")");
+```
+- This query is then used in a Sentinel workbook to create a map of the attack in the form of json text
+```JSON
+{
+	"type": 3,
+	"content": {
+	"version": "KqlItem/1.0",
+	"query": "let GeoIPDB_FULL = _GetWatchlist(\"geoip\");\nlet WindowsEvents = SecurityEvent;\nWindowsEvents | where EventID == 4625\n| order by TimeGenerated desc\n| evaluate ipv4_lookup(GeoIPDB_FULL, IpAddress, network)\n| summarize FailureCount = count() by IpAddress, latitude, longitude, cityname, countryname\n| project FailureCount, AttackerIp = IpAddress, latitude, longitude, city = cityname, country = countryname,\nfriendly_location = strcat(cityname, \" (\", countryname, \")\");",
+	"size": 3,
+	"timeContext": {
+		"durationMs": 2592000000
+	},
+	"queryType": 0,
+	"resourceType": "microsoft.operationalinsights/workspaces",
+	"visualization": "map",
+	"mapSettings": {
+		"locInfo": "LatLong",
+		"locInfoColumn": "countryname",
+		"latitude": "latitude",
+		"longitude": "longitude",
+		"sizeSettings": "FailureCount",
+		"sizeAggregation": "Sum",
+		"opacity": 0.8,
+		"labelSettings": "friendly_location",
+		"legendMetric": "FailureCount",
+		"legendAggregation": "Sum",
+		"itemColorSettings": {
+		"nodeColorField": "FailureCount",
+		"colorAggregation": "Sum",
+		"type": "heatmap",
+		"heatmapPalette": "greenRed"
+		}
+	}
+	},
+	"name": "query - 0"
+}
+```
 ## Attack Maps & Findings
 
-![Attack Map](https://imgur.com/a/attack-map-5f70cU1)
+<img width="2900" height="1624" alt="image" src="https://github.com/user-attachments/assets/b7578232-ea8e-46b3-a4af-28785f8f6160" />
+
+
 
 - **World Map of Attacks** - Displays source IP geolocations
 - **Heatmaps** - Show attack frequency and intensity
