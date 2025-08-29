@@ -114,7 +114,7 @@ Resource Group – Organized project assets.
 ```
 ## Attack Maps & Findings
 
-<img width="2900" height="1624" alt="image" src="https://github.com/user-attachments/assets/b7578232-ea8e-46b3-a4af-28785f8f6160" />
+![Cloud Honeynet / Attack Map](https://i.imgur.com/aivlCij.png)
 
 
 
